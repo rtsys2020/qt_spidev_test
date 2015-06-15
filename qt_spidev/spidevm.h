@@ -1,5 +1,5 @@
-#ifndef SPIDEV_H
-#define SPIDEV_H
+#ifndef SPIDEVM_H
+#define SPIDEVM_H
 #include <stdint.h>
 #include <unistd.h>
 #include <stdio.h>
@@ -7,12 +7,15 @@
 #include <string.h>
 #include <getopt.h>
 #include <fcntl.h>
+#include <asm-generic/ioctl.h>
 #include <sys/ioctl.h>
 #include <linux/types.h>
 #include <linux/spi/spidev.h>
 #include <QThread>
-#include <Qmutex>
+#include <QMutex>
 #include <QWaitCondition>
+#include <asm-generic/ioctl.h>
+
 class SpiDev : public QThread
 {
   Q_OBJECT

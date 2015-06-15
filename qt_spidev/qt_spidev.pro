@@ -16,7 +16,11 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp \
-    spidev.cpp
+    spidev.cpp \
+
 
 HEADERS += \
-    spidev.h
+    spidevm.h\
+    #../../ilum9260/include/asm-generic/ioctl.h
+
+#INCLUDEPATH += ../../ilum9260

@@ -1,16 +1,4 @@
-#include "spidev.h"
-
-#include <stdint.h>
-#include <unistd.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <getopt.h>
-#include <fcntl.h>
-
-#include <sys/ioctl.h>
-#include <linux/types.h>
-#include <linux/spi/spidev.h>
+#include "spidevm.h"
 #include <QCoreApplication>
 
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
@@ -43,9 +31,15 @@ SpiDev::SpiDev(QObject *parent) :
 
 void SpiDev::run()
 {
+  int ret = 0;
+  int fd;
+  uint8_t *tx;
+  uint8_t *rx;
+  int size;
+
   fd = open(device, O_RDWR);
   if (fd < 0)
-          pabort("can't open device\n");
+          printf("can't open device\n");
 
   /*
    * spi mode
@@ -57,22 +51,22 @@ void SpiDev::run()
    */
   ret = ioctl(fd, SPI_IOC_WR_BITS_PER_WORD, &bits);
   if (ret == -1)
-          pabort("can't set bits per word\n");
+          printf("can't set bits per word\n");
 
   ret = ioctl(fd, SPI_IOC_RD_BITS_PER_WORD, &bits);
   if (ret == -1)
-          pabort("can't get bits per word\n");
+          printf("can't get bits per word\n");
 
   /*
    * max speed hz
    */
   ret = ioctl(fd, SPI_IOC_WR_MAX_SPEED_HZ, &speed);
   if (ret == -1)
-          pabort("can't set max speed hz\n");
+          printf("can't set max speed hz\n");
 
   ret = ioctl(fd, SPI_IOC_RD_MAX_SPEED_HZ, &speed);
   if (ret == -1)
-          pabort("can't get max speed hz\n");
+          printf("can't get max speed hz\n");
 
   printf("spi mode: 0x%x\n", mode);
   printf("bits per word: %d\n", bits);
@@ -85,6 +79,7 @@ void SpiDev::run()
         waitq.wait(&mutexq,1000);
         transfer(fd, default_tx, default_rx, sizeof(default_tx));
         mutexq.unlock();
+        break;
     }
         close(fd);
 }
@@ -94,18 +89,19 @@ void SpiDev::transfer(int fd, uint8_t const *tx, uint8_t const *rx, size_t len)
 {
 	int ret;
 
-	struct spi_ioc_transfer tr ;
-		tr.tx_buf = (unsigned long)tx;
-		tr.rx_buf = (unsigned long)rx;
-		tr.len = len;
-		tr.delay_usecs = delay;
+	struct spi_ioc_transfer tr ={
+		tr.tx_buf = (unsigned long)tx,
+		tr.rx_buf = (unsigned long)rx,
+		tr.len = len,
+		tr.delay_usecs = delay
 		//.speed_hz = 0,//speed,
 		//.bits_per_word = bits,
-
+};
 
 	ret = ioctl(fd, SPI_IOC_MESSAGE(1), &tr);
+
 	if (ret < 1)
-		pabort("can't send spi message\n");
+		printf("can't send spi message\n");
 
 }
 
