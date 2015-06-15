@@ -11,7 +11,7 @@
 #include <linux/types.h>
 #include <linux/spi/spidev.h>
 #include <QThread>
-#include <mutex>
+#include <Qmutex>
 #include <QWaitCondition>
 class SpiDev : public QThread
 {
